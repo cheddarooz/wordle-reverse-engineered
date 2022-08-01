@@ -7,11 +7,12 @@ public class GameManager : MonoBehaviour
 {
     public GameObject center;
     public GameObject containedLetter;
+    public GameObject warningUI;
 
     string guessedWord;
     string wordToGuess;
 
-    char[] guessedLetters = new char[5];
+    char[] actualWordInCharArray;
     bool[] guessedWordCheck = new bool[5];
 
     int wordGuessRow = 1;
@@ -21,13 +22,16 @@ public class GameManager : MonoBehaviour
     
     void Start()
     {
-       //lettersGuessed = new bool[wordToGuess.Length];
+        wordToGuess = "apple";
+        actualWordInCharArray = wordToGuess.ToCharArray();
+
+        guessedWordCheck = new bool[wordToGuess.Length];
 
         center = GameObject.Find("centerReferencePoint");
+        warningUI = GameObject.Find("warningUI");
 
-        wordToGuess = "apple";
-        guessedLetters = wordToGuess.ToCharArray();
-
+        warningUI.SetActive(false);
+       
         initializeLetterSpaces();
     }
 
@@ -84,16 +88,16 @@ public class GameManager : MonoBehaviour
         {
             if(guessedWord.Length == 5)
             {
-                print("doing some shit");
+                print("processing word");
+                checkFinalWordInput(guessedWord);
+                guessedWord = "";
                 wordGuessRow = 1;
                 wordGuessColumn--;
-                guessedWord = "";
-                checkFinalWordInput();
                 // logic to check and parse the word AND changing the Y value to Y + 1
             }
             if(guessedWord.Length < 5)
             {
-                // logic to throw a GUI for some seconds telling the user the following message "Not enough letters"
+                StartCoroutine(displayGUIWarning());   
             }
             //check if the guessedWord length is equal to is equal to five, if its not then throw a gui
         }
@@ -104,12 +108,34 @@ public class GameManager : MonoBehaviour
     {
         GameObject.Find("letter" + wordGuessRow + "." + wordGuessColumn).GetComponent<Text>().text = c.ToString();
     }    
-    public void displayWarningToUser()
+    public void checkFinalWordInput(string word)
     {
+        char[] guessedWordInCharArray = word.ToCharArray();
+        int wordGuessRowForColorChange = 1;
+        int wordGuessColumnForColorChange = 6;
+        int correctlyGuessedLetterCount = 0;
 
-    }
-    public void checkFinalWordInput()
+        for(int i = 0; i < word.Length; i++)
+        {
+            if(guessedWordInCharArray[i].Equals(actualWordInCharArray[i]))
+            {
+                guessedWordCheck[i] = true;
+                correctlyGuessedLetterCount++;
+                print("green");
+                
+            }
+        }
+        if(correctlyGuessedLetterCount == 5)
+        {
+            print("win");
+        }
+       
+    }    
+
+    IEnumerator displayGUIWarning()
     {
-
+        warningUI.SetActive(true);
+        yield return new WaitForSeconds(3);
+        warningUI.SetActive(false);
     }    
 }
