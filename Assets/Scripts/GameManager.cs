@@ -93,15 +93,12 @@ public class GameManager : MonoBehaviour
                 guessedWord = "";
                 wordGuessRow = 1;
                 wordGuessColumn--;
-                // logic to check and parse the word AND changing the Y value to Y + 1
             }
             if(guessedWord.Length < 5)
             {
                 StartCoroutine(displayGUIWarning());   
             }
-            //check if the guessedWord length is equal to is equal to five, if its not then throw a gui
         }
-        
     }    
 
     public void updateOnScreenLetterGuess(char c)
@@ -111,23 +108,52 @@ public class GameManager : MonoBehaviour
     public void checkFinalWordInput(string word)
     {
         char[] guessedWordInCharArray = word.ToCharArray();
-        int wordGuessRowForColorChange = 1;
+        int wordGuessRowForColorChange = 0;
         int wordGuessColumnForColorChange = 6;
         int correctlyGuessedLetterCount = 0;
 
         for(int i = 0; i < word.Length; i++)
         {
-            if(guessedWordInCharArray[i].Equals(actualWordInCharArray[i]))
+            wordGuessRowForColorChange++;
+            if (guessedWordInCharArray[i].Equals(actualWordInCharArray[i]))
             {
                 guessedWordCheck[i] = true;
                 correctlyGuessedLetterCount++;
-                print("green");
+                GameObject.Find("letter" + wordGuessRowForColorChange + "." + wordGuessColumnForColorChange).GetComponent<Text>().color = Color.yellow;
+                print("green at " + guessedWordInCharArray[i]);
                 
             }
         }
         if(correctlyGuessedLetterCount == 5)
         {
             print("win");
+        }
+
+        for(int i = 0; i < word.Length; i++)
+        {
+            wordGuessRowForColorChange = 1;
+
+            for (int k = 0; k < wordToGuess.Length; k++) 
+            {
+                print(guessedWordInCharArray[i]);
+                if(wordGuessRowForColorChange == 6)
+                {
+                    print("value changed");
+                    wordGuessRowForColorChange = 5;
+                }
+
+                if ((guessedWordInCharArray[i].Equals(actualWordInCharArray[k])) && (guessedWordCheck[k] == false))
+                {
+                    GameObject.Find("letter" + wordGuessRowForColorChange + "." + wordGuessColumnForColorChange).GetComponent<Text>().color = Color.yellow;
+                    print("yellow");
+                    print("yellow at " + guessedWordInCharArray[i] + " with " + actualWordInCharArray[k]);
+                    print("current boolean in array" + guessedWordCheck[i]);
+                }
+                wordGuessRowForColorChange++;
+               ///print(wordGuessRowForColorChange);
+            }
+            
+
         }
        
     }    
