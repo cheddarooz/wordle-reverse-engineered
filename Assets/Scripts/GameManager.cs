@@ -13,10 +13,11 @@ public class GameManager : MonoBehaviour
     string wordToGuess;
 
     char[] actualWordInCharArray;
-    bool[] guessedWordCheck = new bool[5];
+    bool[] guessedWordCheck;
 
     int wordGuessRow = 1;
     int wordGuessColumn = 6;
+    int wordGuessColumnForColorChange = 6;
 
     char emptySpace = ' ';
     
@@ -24,9 +25,9 @@ public class GameManager : MonoBehaviour
     {
         wordToGuess = "apple";
         actualWordInCharArray = wordToGuess.ToCharArray();
+        actualWordInCharArray = shiftArrayIndexPlusOne(actualWordInCharArray);
 
-        guessedWordCheck = new bool[wordToGuess.Length];
-
+        guessedWordCheck = new bool[actualWordInCharArray.Length];
         center = GameObject.Find("centerReferencePoint");
         warningUI = GameObject.Find("warningUI");
 
@@ -64,7 +65,7 @@ public class GameManager : MonoBehaviour
 
             if (currentKeyboardLetterAsAscii >= 97 && currentKeyboardLetterAsAscii <= 122)
             {
-                if(wordGuessRow <= 5)
+                if(wordGuessRow < 6)
                 {
                     updateOnScreenLetterGuess(currentKeyBoardLetterInput);
                     //GameObject.Find("wordGuessed").GetComponent<Text>().text = Input.inputString.ToString();
@@ -93,6 +94,7 @@ public class GameManager : MonoBehaviour
                 guessedWord = "";
                 wordGuessRow = 1;
                 wordGuessColumn--;
+                wordGuessColumnForColorChange--;
             }
             if(guessedWord.Length < 5)
             {
@@ -108,56 +110,59 @@ public class GameManager : MonoBehaviour
     public void checkFinalWordInput(string word)
     {
         char[] guessedWordInCharArray = word.ToCharArray();
-        int wordGuessRowForColorChange = 0;
-        int wordGuessColumnForColorChange = 6;
+
+        guessedWordInCharArray = shiftArrayIndexPlusOne(guessedWordInCharArray);
+
+        int wordGuessRowForColorChange = 1;
         int correctlyGuessedLetterCount = 0;
 
-        for(int i = 0; i < word.Length; i++)
+        for (int i = 1; i < guessedWordInCharArray.Length; i++)
         {
-            wordGuessRowForColorChange++;
             if (guessedWordInCharArray[i].Equals(actualWordInCharArray[i]))
             {
                 guessedWordCheck[i] = true;
                 correctlyGuessedLetterCount++;
-                GameObject.Find("letter" + wordGuessRowForColorChange + "." + wordGuessColumnForColorChange).GetComponent<Text>().color = Color.yellow;
+                GameObject.Find("letter" + wordGuessRowForColorChange + "." + wordGuessColumnForColorChange).GetComponent<Text>().color = Color.green;
                 print("green at " + guessedWordInCharArray[i]);
                 
             }
+          wordGuessRowForColorChange++;
         }
-        if(correctlyGuessedLetterCount == 5)
+        
+        if (correctlyGuessedLetterCount == 5)
         {
             print("win");
         }
 
-        for(int i = 0; i < word.Length; i++)
+        for(int i = 1; i < actualWordInCharArray.Length; i++)
         {
             wordGuessRowForColorChange = 1;
 
-            for (int k = 0; k < wordToGuess.Length; k++) 
+            for (int k = 1; k < guessedWordInCharArray.Length; k++) 
             {
-                print(guessedWordInCharArray[i]);
-                if(wordGuessRowForColorChange == 6)
-                {
-                    print("value changed");
-                    wordGuessRowForColorChange = 5;
-                }
-
-                if ((guessedWordInCharArray[i].Equals(actualWordInCharArray[k])) && (guessedWordCheck[k] == false))
+                if ((actualWordInCharArray[i].Equals(guessedWordInCharArray[k])) && (guessedWordCheck[k].Equals(false)))
                 {
                     GameObject.Find("letter" + wordGuessRowForColorChange + "." + wordGuessColumnForColorChange).GetComponent<Text>().color = Color.yellow;
-                    print("yellow");
                     print("yellow at " + guessedWordInCharArray[i] + " with " + actualWordInCharArray[k]);
-                    print("current boolean in array" + guessedWordCheck[i]);
+                    print("current boolean in array" + guessedWordCheck[k]); 
                 }
                 wordGuessRowForColorChange++;
-               ///print(wordGuessRowForColorChange);
             }
-            
-
         }
-       
-    }    
-
+        correctlyGuessedLetterCount = 0;
+    }
+    
+    public char[] shiftArrayIndexPlusOne(char[] arr)
+    {
+        char[] shiftedArray = new char[arr.Length + 1];
+        
+        for(int i = 1; i < 6; i++)
+        {
+            shiftedArray[i] = arr[i - 1];
+        }
+        return shiftedArray;
+    }
+  
     IEnumerator displayGUIWarning()
     {
         warningUI.SetActive(true);
