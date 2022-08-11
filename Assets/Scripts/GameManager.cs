@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -23,7 +24,8 @@ public class GameManager : MonoBehaviour
     
     void Start()
     {
-        wordToGuess = "apple";
+        wordToGuess = getWordFromFile();
+        print(wordToGuess);
         actualWordInCharArray = wordToGuess.ToCharArray();
         actualWordInCharArray = shiftArrayIndexPlusOne(actualWordInCharArray);
 
@@ -68,7 +70,6 @@ public class GameManager : MonoBehaviour
                 if(wordGuessRow < 6)
                 {
                     updateOnScreenLetterGuess(currentKeyBoardLetterInput);
-                    //GameObject.Find("wordGuessed").GetComponent<Text>().text = Input.inputString.ToString();
                     guessedWord = guessedWord + Input.inputString.ToString();
                     print(guessedWord);
                     wordGuessRow++;
@@ -96,7 +97,7 @@ public class GameManager : MonoBehaviour
                 wordGuessColumn--;
                 wordGuessColumnForColorChange--;
             }
-            if(guessedWord.Length < 5)
+            else
             {
                 StartCoroutine(displayGUIWarning());   
             }
@@ -137,14 +138,21 @@ public class GameManager : MonoBehaviour
         for(int i = 1; i < actualWordInCharArray.Length; i++)
         {
             wordGuessRowForColorChange = 1;
+           
+            int currentCharFrequency = wordToGuess.Count(x => (x == actualWordInCharArray[i]));
+            int charFrequencyComparison = 0;
 
             for (int k = 1; k < guessedWordInCharArray.Length; k++) 
             {
                 if ((actualWordInCharArray[i].Equals(guessedWordInCharArray[k])) && (guessedWordCheck[k].Equals(false)))
                 {
-                    GameObject.Find("letter" + wordGuessRowForColorChange + "." + wordGuessColumnForColorChange).GetComponent<Text>().color = Color.yellow;
-                    print("yellow at " + guessedWordInCharArray[i] + " with " + actualWordInCharArray[k]);
-                    print("current boolean in array" + guessedWordCheck[k]); 
+                    charFrequencyComparison++;
+                    if(charFrequencyComparison <= currentCharFrequency)
+                    {
+                        GameObject.Find("letter" + wordGuessRowForColorChange + "." + wordGuessColumnForColorChange).GetComponent<Text>().color = Color.yellow;
+                    }
+                    //print("yellow at " + guessedWordInCharArray[i] + " with " + actualWordInCharArray[k]);
+                    //print("current boolean in array" + guessedWordCheck[k]); 
                 }
                 wordGuessRowForColorChange++;
             }
@@ -162,11 +170,24 @@ public class GameManager : MonoBehaviour
         }
         return shiftedArray;
     }
-  
+    
+    public string getWordFromFile()
+    {
+        TextAsset word = (TextAsset)Resources.Load("fiveletterwords", typeof(TextAsset));
+        string wordsFromText = word.text;
+        string[] splitWords = wordsFromText.Split("\n"[0]);
+        int randomWord = Random.Range(0, splitWords.Length);
+
+        string finalWord = splitWords[randomWord];
+        finalWord = finalWord.ToLower();
+
+        return finalWord;
+    }
     IEnumerator displayGUIWarning()
     {
         warningUI.SetActive(true);
         yield return new WaitForSeconds(3);
         warningUI.SetActive(false);
     }    
+
 }
